@@ -450,7 +450,7 @@ void VG_(vg_yield)(void)
    /* 
       Tell the kernel we're yielding.
     */
-#  if defined(VGO_linux) || defined(VGO_darwin)
+#  if defined(VGO_linux) || defined(VGO_darwin) || defined(VGO_netbsd)
    VG_(do_syscall0)(__NR_sched_yield);
 #  elif defined(VGO_solaris)
    VG_(do_syscall0)(__NR_yield);
@@ -491,6 +491,7 @@ static void os_state_clear(ThreadState *tst)
    tst->os_state.stk_id = NULL_STK_ID;
 #  if defined(VGO_linux)
    /* no other fields to clear */
+
 #  elif defined(VGO_darwin)
    tst->os_state.post_mach_trap_fn = NULL;
    tst->os_state.pthread           = 0;
@@ -501,6 +502,7 @@ static void os_state_clear(ThreadState *tst)
    tst->os_state.remote_port       = 0;
    tst->os_state.msgh_id           = 0;
    VG_(memset)(&tst->os_state.mach_args, 0, sizeof(tst->os_state.mach_args));
+
 #  elif defined(VGO_solaris)
 #  if defined(VGP_x86_solaris)
    tst->os_state.thrptr = 0;
@@ -511,6 +513,10 @@ static void os_state_clear(ThreadState *tst)
    tst->os_state.oldcontext = NULL;
    tst->os_state.schedctl_data = 0;
    tst->os_state.daemon_thread = False;
+
+#  elif defined(VGO_netbsd)
+   tst->os_state.oldcontext = NULL;
+
 #  else
 #    error "Unknown OS"
 #  endif
